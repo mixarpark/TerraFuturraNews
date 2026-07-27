@@ -1,4 +1,4 @@
-name: Run News Bot
+name: TerraFuturra News Bot
 
 on:
   schedule:
