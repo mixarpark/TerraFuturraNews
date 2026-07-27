@@ -18,7 +18,7 @@ HISTORY_FILE = "sent_articles.txt"
 
 KEYWORDS = ['ar', 'phygital', 'audio', 'immersive', 'xr', 'augmented reality', 
             'spatial audio', 'immsersive audio', 'mixed reality', 
-            'spatial computing', 'interactive', 'smart glasses', 'ai']
+            'spatial computing', 'interactive', 'smart glasses', 'ai', 'territorial branding', 'branding', 'territorial marketing', 'marketing', 'place marketing',  'placemarketing']
 EXCEPTIONS = ['vr', 'virtual reality']
 
 # Предварительная компиляция регулярных выражений для СУПЕР-быстрого поиска
