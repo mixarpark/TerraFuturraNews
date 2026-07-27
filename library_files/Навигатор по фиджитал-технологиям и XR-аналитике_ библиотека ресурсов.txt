@@ -1,0 +1,63 @@
+﻿Основываясь на предоставленных источниках, я собрал и систематизировал обширную библиотеку интернет-ссылок, охватывающую различные аспекты фиджитал-технологий, смешанной и дополненной реальности (XR/AR), а также аналитики рыночных трендов. Библиотека разделена на профильные категории.
+1. Трендбуки и стратегические аналитические отчеты
+Документы и публикации ведущих консалтинговых агентств для макроэкономического прогнозирования и анализа рынка:
+* Deloitte: Отчеты по технологическим трендам на 2026 год (https://mkto.deloitte.com/rs/712-CNF-326/images/DI_Tech-trends-2026.pdf) и 2025 год (https://www.deloitte.com/ce/en/related-content/tech-trends-2025.html), а также маркетинговые тренды 2025 года (https://www.deloittedigital.com/nl/en/insights/perspective/marketing-trends-2025.html) 1, 2.
+* McKinsey: Прогнозы технологического развития на 2025 год (https://www.mckinsey.com/~/media/mckinsey/business%20functions/mckinsey%20digital/our%20insights/the%20top%20trends%20in%20tech%202025/mckinsey-technology-trends-outlook-2025.pdf) и 2024 год (https://www.mckinsey.com/~/media/mckinsey/business%20functions/mckinsey%20digital/our%20insights/the%20top%20trends%20in%20tech%202024/mckinsey-technology-trends-outlook-2024.pdf) 3, 4.
+* Boston Consulting Group (BCG): Предсказания для индустрии ритейла до 2026 года (https://web-assets.bcg.com/34/d7/19023b7a4876b4732d5b0055ab69/2026-retail-predictions.pdf) 5.
+* Accenture: Манифесты Tech Vision за 2024 год (https://www.scribd.com/document/699800805/Accenture-Tech-Vision-2024) и 2025 год (https://www.scribd.com/document/814879777/Accenture-Tech-Vision-2025) 6, 7.
+* PwC / Fynd: Отчет по фиджитал-решениям PRC Report 2025 (https://www.fynd.com/ebooks/prc-report-2025) 8.
+* Ipsos & Snapchat: Исследование трендов в сегменте люкс 2024 (https://www.ipsos.com/sites/default/files/ct/publication/documents/2024-08/Snapchat%20x%20Ipsos%20-%20Exploring%20Trends%20in%20Luxury%202024.pdf) 9.
+* Fulcrum Digital: Прогноз будущего потребительских товаров (https://fulcrumdigital.com/wp-content/uploads/2025/05/The-future-of-Consumer-Products.pdf) 10.
+* Scribd (независимая аналитика): Разбор битвы операционных систем в XR (https://www.scribd.com/document/975105163/Untitled-Document-2) 10.
+2. Академические ресурсы и научные публикации
+Платформы для изучения исследований в сфере пространственных вычислений, аудиодополненной реальности и взаимодействия человека с компьютером:
+* IEEE VR: Документы и доклады ведущих конференций 2023 года (http://ieeevr.org/2023/contribute/papers/), 2024 года (https://ieeevr.org/2024/program/papers/) и 2025 года (http://ieeevr.org/2025/program/papers/) 11.
+* ISMAR: Официальный сайт симпозиума по смешанной и дополненной реальности (https://www.ismar.net/) 11 и анализ кризиса воспроизводимости исследований (https://www.florianweidner.de/content/paper/ISMAR2025-Arefin-Replication.pdf) 12.
+* IEEE TVCG: Публикации журнала по визуализации (https://ieeexplore.ieee.org/iel8/2945/11151252/11002522.pdf) 13.
+* ResearchGate: База научных публикаций (https://www.researchgate.net/) 13.
+* Computer.org: Мета-анализ носимых AR-устройств (https://www.computer.org/csdl/journal/tg/2023/11/10269051/1QV8qNa9aBG) 14.
+* Science Sport: Статьи по развитию студенческого фиджитал-спорта (https://sciencesport.ru/en/journals/tom-12-nos1-2024/articles/state-and-priority-directions-development-student-phygital) 12.
+* Sinergie Journal: Академический анализ клиентского опыта в фиджитал-ритейле (https://ojs.sijm.it/index.php/sinergie/article/view/1841) 15.
+* Emerald Publishing: Исследования о гибридном опыте сотрудников (https://www.emerald.com/jsm/article/doi/10.1108/JSM-09-2025-0707/1360422/Enhancing-phygital-employee-experience-in-high) 15.
+* Journal for Social Science Archives: Обзоры фиджитал-трансформации (https://jssarchives.com/index.php/Journal/article/download/455/420/1017) 14.
+* Emergent Mind: Обзоры исследований по Audio Augmented Reality (https://www.emergentmind.com/) 16.
+3. Отраслевые медиа, новости и агрегаторы рынка
+Сайты для оперативного мониторинга венчурных сделок, новых аппаратных гарнитур и рынка:
+* XR-новости: Road to VR (https://www.roadtovr.com/), UploadVR (https://uploadvr.com/), VR.org (https://vr.org/), The Skarredghost (https://scarredghost.com/), VRDB (https://vrdb.app/news), Looking Glass XR (https://lookingglassxr.com/virtual-reality-news-and-technology/) 17-20.
+* Pimax Blog: Каталог главных новостных VR-ресурсов (https://pimax.com/blogs/blogs/navigating-virtual-reality-top-news-websites-for-vr-news) 21.
+* CNET: Тестирование умных очков и рыночная аналитика (https://www.cnet.com/tech/computing/best-smart-glasses/, https://www.cnet.com/tech/computing/meta-pivot-from-vr-horizon-worlds-to-smart-glasses/) 20, 22.
+* Retail Dive: Новости автоматизации ритейла (https://www.retaildive.com/, https://www.retaildive.com/news/retailers-artifcial-intelligence-marketing-merchandising/806680/) 19, 22.
+* McKinsey Retail Insights: Стратегическая аналитика в ритейле (https://www.mckinsey.com/industries/retail/our-insights) 22.
+* Future Commerce: Подкасты и статьи о будущем коммерции (https://www.futurecommerce.com/episodes) 23.
+* Ai Mania: Обзор систем на базе ИИ, таких как Trend Hunter (https://aimania.ru/ai/trend-hunter) 24.
+* Аналитика рынка от агентств: IDC (https://www.idc.com/promo/arvr/), Fortune Business Insights (https://www.fortunebusinessinsights.com/extended-reality-market-106637), Grand View Research (https://www.grandviewresearch.com/press-release/global-extended-reality-xr-market) 25, 26.
+4. Платформы разработки, SDK и сообщества
+Инструментарий для программирования пространственных решений:
+* Apple AR: Портал разработчиков (https://developer.apple.com/augmented-reality/) 27.
+* Milvus: Гид по выбору AR SDK (https://milvus.io/ai-quick-reference/what-are-the-most-popular-ar-software-development-kits-sdks) 28.
+* Magineu & Frame Sixty: Обзоры AR-фреймворков и компаний-разработчиков (https://www.magineu.com/journals/top-7-ar-frameworks-to-use-for-your-augmented-reality-apps/, https://framesixty.com/ar-app-development-companies/) 28.
+* Echo3D: Инструменты доставки 3D-объектов (https://www.echo3d.com/post/top-10-ar-developer-tools-every-developer-should-know) 29.
+* The Hive Index: Каталог девелоперских XR-комьюнити (https://thehiveindex.com/topics/augmented-reality/) 27.
+* Reddit (Полезные ветки сообщества):
+* Альтернативы платформе Spark AR: https://www.reddit.com/r/augmentedreality/comments/1qekkdr/with_meta_spark_gone_here_are_the_top_6_ar/ 29.
+* Ресурсы для новичков: https://www.reddit.com/r/augmentedreality/comments/zp6wa1/ive_put_together_a_pagelist_of_resources_for/ 25.
+* Дискуссии по обучению: https://www.reddit.com/r/virtualreality/comments/1l8p5vi/should_i_learn_ar_and_vr_development/ 25.
+* Активные Discord-каналы: https://www.reddit.com/r/virtualreality/comments/1kfhr61/are_there_any_active_vr_developing_discords/ 25.
+5. Консорциумы, стандарты и ассоциации
+Институты, ответственные за интероперабельность метавселенных и единые стандарты:
+* VR/AR Association (VRARA): Главный сайт ассоциации (https://www.thevrara.com/) 21, включая разделы с филиалами (https://www.thevrara.com/chapters) и исследованиями (https://www.thevrara.com/general/research-and-education) 30.
+* Khronos Group: Открытые 3D-стандарты и интеграция (https://www.khronos.org/news/permalink/khronos-group-launched-initiative-the-metaverse-standards-forum-incorporates), а также выставка AWE (https://www.khronos.org/events/awe-2026) 31, 32.
+* W3C: О стандартах WebXR (https://www.w3.org/news/2022/w3c-joins-leading-standards-organizations-and-companies-to-coordinate-interoperability-standards-for-an-open-and-inclusive-metaverse/) 31.
+* Metaverse Standards Forum: Аналитика от The New Stack (https://thenewstack.io/metaverse-standards-forum/) и подкаст Voices of VR (https://voicesofvr.com/1098-metaverse-standards-forum-unites-leading-standards-orgs-xr-companies-towards-open-metaverse-interoperability/) 30.
+* AWE Expo: Сайт главной XR-выставки в мире (https://www.awexr.com/, https://www.awexr.com/usa-2025) 32.
+* Object Management Group (OMG) и IIC: (https://www.omg.org/news/releases/pr2024/03-18-24.htm, https://www.iiconsortium.org/liaisons/) 33, 34.
+6. Фиджитал-спорт и практические кейсы применения
+Регулирование цифро-физического спорта и знаковые индустриальные решения:
+* World Phygital Community: Ключевой регулирующий орган (https://worldphygital.org/), объяснение концепции (https://worldphygital.org/phygital-explained/) и свод общих правил (https://worldphygital.org/wp-content/uploads/2024/07/240621_rulebook_wpc-1.pdf) 35, 36.
+* Игры Будущего (Games of the Future): Официальный сайт турнира (https://gofuture.games/) 36, анонс дат и дисциплин (https://worldphygital.org/news/games-of-the-future-2026-dates-and-disciplines-announced/, https://www.prnewswire.com/ae/news-releases/the-games-of-the-future-2026-dates-and-disciplines-confirmed-for-astana-302711130.html) 35, 37, пресс-релиз о билетах (https://www.gamespress.com/GET-YOUR-TICKETS-GAMES-OF-THE-FUTURE-2026-TICKETS-GO-ON-SALE-TODAY) 37.
+* Спецификации Phygital Football: Технический регламент (https://quetzales.mx/wp-content/uploads/2024/12/TR_Football_PhygitalSportsUSA_12012024-1.pdf) 36.
+* Chute Gerdeman: Обзор практических кейсов ритейла (https://www.chutegerdeman.com/the-phygital-retail-experience/) 37.
+* Википедия: Справка об институционализации спорта (https://en.wikipedia.org/wiki/Phygital_sport) 38.
+* Ray-Ban Meta & Audio AR: Официальный блог о рекламной кампании (https://www.meta.com/blog/chris-hemsworth-pratt-ray-ban-meta-ai-glasses-football-ad-campaign-2025/) и кейс агентства (https://www.specialguest.co/projects/ray-ban-meta-spring-summer-campaign) 39.
+* Пространственный звук в культурном наследии (PHE VR): (https://air.unipr.it/retrieve/e177fbc6-df89-50b0-e053-d805fe0adaee/297-PHE_VR_Cultural_Heritage.pdf) 39.
+* Рассылки по инновациям (Patrice Duboé): Примеры мониторинга новых трендов (https://drive.google.com/file/d/1yPEdwv3enHGTNe4H5FlO7w8NJeLUuQ8P/view?usp=share_link) 40.
