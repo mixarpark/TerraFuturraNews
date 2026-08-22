@@ -16,77 +16,59 @@ FOLDER_PATH = "library_files"
 SOURCE_LINKS_FILE = "source_links.txt"
 HISTORY_FILE = "sent_articles.txt"
 
-# Keywords for News Parsing: Territorial Marketing, Tourism, Urban Dev & Talent Attraction
-
 KEYWORDS = [
-    # --- Core Place Marketing & Branding ---
+    # Core Place Marketing & Branding
     'place branding', 'place marketing', 'territorial branding', 'territorial marketing',
     'city branding', 'city marketing', 'destination branding', 'destination marketing',
     'regional branding', 'regional marketing', 'nation branding', 'location marketing',
     'place identity', 'place reputation', 'place image', 'destination management organization',
-    
-    # --- Tourism & Visitor Economy ---
+    # Tourism & Visitor Economy
     'visitor economy', 'sustainable tourism', 'ecotourism', 'smart tourism',
     'experiential travel', 'experiential tourism', 'cultural tourism', 'rural tourism',
-    'tourism development', 'tourist attraction', 'destination management', 
-    'digital nomad destination',
-    
-    # --- Urban Development & Placemaking ---
+    'tourism development', 'tourist attraction', 'destination management', 'digital nomad destination',
+    # Urban Development & Placemaking
     'urban development', 'urban planning', 'placemaking', 'creative placemaking',
     'urban regeneration', 'urban revitalization', 'smart city', 'smart urbanism',
     'public space activation', 'urban design', 'tactical urbanism', '15-minute city',
     'transit-oriented development', 'sustainable urban development',
-    
-    # --- Livability & Resident Attractiveness ---
+    # Livability & Resident Attractiveness
     'livability', 'liveability', 'quality of life', 'citizen well-being',
     'resident engagement', 'community engagement', 'resident retention', 'resident attraction',
     'urban amenities', 'vibrant community', 'community building', 'inclusive city',
     'social inclusion', 'green infrastructure', 'citizen happiness',
-    
-    # --- Skilled Migration, Talent & Economic Development ---
+    # Skilled Migration, Talent & Economic Development
     'talent attraction', 'talent retention', 'skilled migration', 'global talent',
     'brain gain', 'human capital', 'knowledge economy', 'creative class',
     'innovation ecosystem', 'startup ecosystem', 'expat community', 'relocation hub',
     'economic development', 'foreign direct investment', 'innovation district'
 ]
 
-# Exceptions to filter out corporate HR, digital marketing spam, and negative urban/tourism trends
 EXCEPTIONS = [
     # Marketing & Commercial Branding noise
     'digital marketing', 'email marketing', 'affiliate marketing', 'influencer marketing',
     'multi-level marketing', 'network marketing', 'brand ambassador', 'trademark', 
     'seo marketing', 'content marketing',
-    
     # Negative or irrelevant Tourism
     'overtourism', 'tourist trap', 'dark tourism', 'space tourism', 'medical tourism',
-    
     # Negative Migration & Corporate HR noise
     'brain drain', 'talent acquisition', 'talent management', 'talent show', 
     'corporate branding', 'employer branding', 
-    
     # Unrelated Economy/Real Estate
     'real estate bubble', 'stock market', 'parking ticket'
 ]
 
-# Пример логики для парсера (псевдокод/набросок для дальнейшего использования):
-# match = any(keyword in text_lower for keyword in KEYWORDS) and not any(exception in text_lower for exception in EXCEPTIONS)
-
-
-
-# Предварительная компиляция регулярных выражений для СУПЕР-быстрого поиска
-# Ищем любое из ключевых слов как самостоятельное слово (без учета регистра)
+# Сверхбыстрая компиляция регулярных выражений
 KW_PATTERN = re.compile(rf"\b({'|'.join(map(re.escape, KEYWORDS))})\b", re.IGNORECASE)
 EXC_PATTERN = re.compile(rf"\b({'|'.join(map(re.escape, EXCEPTIONS))})\b", re.IGNORECASE)
 
-# Заголовки для обхода блокировок парсинга
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 }
 
 translator = GoogleTranslator(source='auto', target='ru')
 
 # ==========================================
-# 2. ФУНКЦИИ ИЗВЛЕЧЕНИЯ ССЫЛОК
+# 2. ФУНКЦИИ ИЗВЛЕЧЕНИЯ И ОТПРАВКИ
 # ==========================================
 def extract_links_from_pdf(file_path):
     found_urls = set()
@@ -95,9 +77,7 @@ def extract_links_from_pdf(file_path):
             for page in pdf.pages:
                 text = page.extract_text()
                 if text:
-                    # Ищем ссылки сразу на странице, не скапливая мега-строку
-                    urls = re.findall(r"https?://[^\s\)]+", text)
-                    found_urls.update(urls)
+                    found_urls.update(re.findall(r"https?://[^\s\)]+", text))
     except Exception as e:
         print(f"❌ Ошибка чтения PDF {file_path}: {e}")
     return found_urls
@@ -111,79 +91,75 @@ def extract_links_from_txt(file_path):
         return set()
 
 def send_to_telegram(title, url, keyword):
-    """Единая функция для перевода и отправки сообщения в Telegram"""
     try:
         translated_title = translator.translate(title)
-    except Exception as e:
-        print(f"⚠️ Ошибка перевода: {e}")
-        translated_title = title # Фолбек: отправляем без перевода, если API отвалился
+    except:
+        translated_title = title 
 
     hashtag = f"#{keyword.replace(' ', '_')}"
     message_text = f"📰 Найдено по тегу {hashtag}\n\n🇷🇺 {translated_title}\n🇬🇧 {title}\n\n🔗 {url}"
     
     tg_api = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     try:
-        # Обязательно используем timeout!
         requests.post(tg_api, data={"chat_id": CHAT_ID, "text": message_text}, timeout=10)
     except Exception as e:
         print(f"❌ Ошибка отправки в Telegram: {e}")
 
 # ==========================================
-# 3. ПОДГОТОВКА ИСТОЧНИКОВ (ПАРСИНГ ПАПКИ)
+# 3. ПОДГОТОВКА ИСТОЧНИКОВ (СБОР БАЗЫ)
 # ==========================================
-all_links = set() # Сразу используем множество для исключения дубликатов
+all_links = set()
 
+# А. Сначала берем то, что УЖЕ есть (сохраняем работу Разведчика!)
+if os.path.exists(SOURCE_LINKS_FILE):
+    with open(SOURCE_LINKS_FILE, "r", encoding="utf-8") as f:
+        all_links.update(f.read().splitlines())
+
+# Б. Затем добавляем свежие ссылки из ручных файлов (PDF/TXT)
 if os.path.exists(FOLDER_PATH):
-    all_files = os.listdir(FOLDER_PATH)
-    print(f"📁 Найдено файлов в {FOLDER_PATH}: {len(all_files)}")
-    
-    for file_name in all_files:
+    print(f"📁 Проверяем папку {FOLDER_PATH}...")
+    for file_name in os.listdir(FOLDER_PATH):
         full_path = os.path.join(FOLDER_PATH, file_name)
         if file_name.lower().endswith(".pdf"):
-            print(f"📄 Читаем PDF: {file_name}")
             all_links.update(extract_links_from_pdf(full_path))
         elif file_name.lower().endswith(".txt"):
-            print(f"📝 Читаем TXT: {file_name}")
             all_links.update(extract_links_from_txt(full_path))
-            
-    # Сохраняем уникальные ссылки
-    with open(SOURCE_LINKS_FILE, "w", encoding="utf-8") as f:
-        for link in sorted(all_links):
-            f.write(link + "\n")
-    print(f"✅ Готово! Сохранено уникальных ссылок: {len(all_links)}")
-else:
-    print(f"⚠️ Папка {FOLDER_PATH} не найдена.")
+
+# В. Сохраняем объединенную базу без потери данных
+with open(SOURCE_LINKS_FILE, "w", encoding="utf-8") as f:
+    for link in sorted(all_links):
+        if link.strip():
+            f.write(link.strip() + "\n")
+
+print(f"✅ База сформирована. Всего уникальных ссылок для проверки: {len(all_links)}")
 
 # ==========================================
-# 4. ПОИСК, ФИЛЬТРАЦИЯ И ОТПРАВКА
+# 4. ПОИСК, ФИЛЬТРАЦИЯ И ОТПРАВКА НОВОСТЕЙ
 # ==========================================
-# Загрузка источников
-rss_urls = []
-if os.path.exists(SOURCE_LINKS_FILE):
-    with open(SOURCE_LINKS_FILE, "r", encoding="utf-8") as file:
-        rss_urls = file.read().splitlines()
-
-# Загрузка истории (используем SET для быстрого поиска)
 sent_links = set()
 if os.path.exists(HISTORY_FILE):
     with open(HISTORY_FILE, "r", encoding="utf-8") as file:
         sent_links = set(file.read().splitlines())
 
-print("\n🚀 Начинаем проверку лент...")
+print("\n🚀 Начинаем проверку сайтов и RSS-лент...")
 
-for url in rss_urls:
+for url in all_links:
+    if not url.strip(): continue
     print(f"📡 Подключаемся к: {url}")
     
     try:
-        # САМОЕ ВАЖНОЕ: Жесткий таймаут на запрос, чтобы скрипт не завис!
-        response = requests.get(url, headers=HEADERS, timeout=15)
-        # Отдаем скачанный контент feedparser'у
+        # ОБЯЗАТЕЛЬНО используем headers, чтобы не получить 403 Forbidden
+        response = requests.get(url, headers=HEADERS, timeout=12)
+        if response.status_code != 200:
+            print(f"⚠️ Сервер отклонил запрос (Код {response.status_code}). Пропускаем.")
+            continue
+            
         feed = feedparser.parse(response.content)
     except Exception as e:
-        print(f"⚠️ Ошибка сети или таймаут. Пропускаем. Причина: {e}")
+        print(f"⚠️ Ошибка сети или таймаут: {e}")
         continue
 
-    # ================= ЛОГИКА: ОБЫЧНЫЕ ВЕБ-СТРАНИЦЫ =================
+    # ================= ЛОГИКА 1: ОБЫЧНЫЕ ВЕБ-СТРАНИЦЫ =================
     if not feed.entries:
         if url in sent_links:
             print(f"⏭️ Пропускаем: {url} (уже отправлено)")
@@ -191,17 +167,19 @@ for url in rss_urls:
             
         try:
             soup = BeautifulSoup(response.text, 'html.parser')
-            full_clean_text = soup.get_text(separator=' ').lower()
             
-            # Быстрый поиск через скомпилированные регулярки
-            match_kw = KW_PATTERN.search(full_clean_text)
-            match_exc = EXC_PATTERN.search(full_clean_text)
+            # Ищем текст ТОЛЬКО в заголовках и абзацах (игнорируем меню и подвалы сайта)
+            text_elements = soup.find_all(['title', 'h1', 'h2', 'h3', 'p', 'meta'])
+            clean_text = ' '.join(elem.get_text(separator=' ', strip=True) for elem in text_elements).lower()
             
-            print(f"🤖 Анализ | Ключи: {bool(match_kw)} | Исключения: {bool(match_exc)}")
+            match_kw = KW_PATTERN.search(clean_text)
+            match_exc = EXC_PATTERN.search(clean_text)
+            
+            print(f"🤖 Анализ страницы | Ключи: {bool(match_kw)} | Исключения: {bool(match_exc)}")
             
             if match_kw and not match_exc:
-                page_title = soup.title.string.strip() if soup.title and soup.title.string else "Без заголовка"
-                found_word = match_kw.group(1).lower() # Достаем то самое слово, которое совпало
+                page_title = soup.title.string.strip() if soup.title and soup.title.string else url
+                found_word = match_kw.group(1).lower()
                 
                 print(f"✅ Отправляем: {page_title}")
                 send_to_telegram(page_title, url, found_word)
@@ -211,9 +189,9 @@ for url in rss_urls:
                 sent_links.add(url)
                 
         except Exception as e:
-            print(f"⚠️ Ошибка обработки HTML {url}: {e}")
+            print(f"⚠️ Ошибка парсинга HTML {url}: {e}")
 
-    # ================= ЛОГИКА: RSS-ЛЕНТЫ =================
+    # ================= ЛОГИКА 2: СТАНДАРТНЫЕ RSS-ЛЕНТЫ =================
     else:
         for article in feed.entries:
             link = getattr(article, 'link', '')
@@ -227,16 +205,16 @@ for url in rss_urls:
             match_kw = KW_PATTERN.search(combined_text)
             match_exc = EXC_PATTERN.search(combined_text)
             
-            if not match_kw or match_exc:
-                continue
+            print(f"🤖 Анализ RSS: {title} | Ключевые: {bool(match_kw)} | Исключения: {bool(match_exc)}")
+            
+            if match_kw and not match_exc:
+                found_word = match_kw.group(1).lower()
+                print(f"✅ Отправляем RSS: {title}")
                 
-            found_word = match_kw.group(1).lower()
-            print(f"✅ Отправляем RSS: {title}")
-            
-            send_to_telegram(title, link, found_word)
-            
-            with open(HISTORY_FILE, "a", encoding="utf-8") as file:
-                file.write(link + "\n")
-            sent_links.add(link)
+                send_to_telegram(title, link, found_word)
+                
+                with open(HISTORY_FILE, "a", encoding="utf-8") as file:
+                    file.write(link + "\n")
+                sent_links.add(link)
 
 print("🎉 Проверка успешно завершена!")
