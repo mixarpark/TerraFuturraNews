@@ -182,21 +182,24 @@ def validate_web_page_or_doc(url, snippet=""):
     return False, ""
 
 def send_telegram_report(new_sources):
-    """Отправляет структурированный отчет в Telegram."""
+    """Отправляет краткий отчет в Telegram только с числом найденных сайтов."""
     if not new_sources or not BOT_TOKEN or not CHAT_ID:
         return
         
-    text = f"🕵️‍♂️ <b>Разведчик: найдено {len(new_sources)} новых источников</b>\n\n"
-    for i, (url, info) in enumerate(list(new_sources.items())[:20], 1):
-        text += f"{i}. <b>{info['type']}</b>: {info['title']}\n🔗 {url}\n\n"
-        
-    text += "<i>Все ссылки добавлены в базу и готовы к мониторингу.</i>"
+    # Формируем только заголовок и количество
+    text = (
+        f"🕵️‍♂️ <b>Отчет Разведчика</b>\n\n"
+        f"Успешно найдено и добавлено в базу: <b>{len(new_sources)}</b> новых источников.\n"
+        f"<i>Основной бот проверит их при следующем запуске.</i>"
+    )
     
     tg_api = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     try:
         requests.post(tg_api, data={"chat_id": CHAT_ID, "text": text, "parse_mode": "HTML"}, timeout=10)
     except Exception as e:
         print(f"⚠️ Ошибка отправки отчета в Telegram: {e}")
+
+
 
 # ==============================================================================
 # 5. ОСНОВНОЙ ЦИКЛ ПОИСКА И ОБРАБОТКИ
