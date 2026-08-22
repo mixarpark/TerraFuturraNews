@@ -1,0 +1,30 @@
+name: Run RSS Scout
+
+on:
+  schedule:
+    - cron: '0 10 * * 6'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-scout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: pip install requests beautifulsoup4 feedparser
+      - env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+        run: python scout.py
+      - run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add source_links.txt
+          git commit -m "Разведка: база пополнена" || echo "Нет изменений"
+          git push
