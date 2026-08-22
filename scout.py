@@ -21,28 +21,33 @@ HEADERS = {
 }
 
 # ==============================================================================
-# 2. МАТРИЦА ПОИСКОВЫХ ЗАПРОСОВ (ГЛУБОКИЙ ПОИСК ПО ВСЕМ ФОРМАТАМ)
+# 2. МАТРИЦА ПОИСКОВЫХ ЗАПРОСОВ (БЕЗ ПЛАТНЫХ ОПЕРАТОРОВ)
 # ==============================================================================
 SEARCH_QUERIES = [
     # 1. Core Place & City Branding
-    '"place branding" OR "city branding" blog OR articles',
-    '"destination branding" OR "territorial marketing" case study',
+    'place branding blog',
+    'city branding articles',
+    'territorial marketing case study',
     
     # 2. Tourism & Destination Management
-    '"sustainable tourism" OR "destination management" insights OR report',
-    '"smart tourism" OR "visitor economy" trends 2026',
+    'destination management insights report',
+    'sustainable tourism trends 2026',
+    'visitor economy strategies',
     
     # 3. Urban Planning & Placemaking
-    '"creative placemaking" OR "tactical urbanism" articles',
-    '"urban regeneration" OR "15-minute city" project case study',
+    'creative placemaking articles',
+    'tactical urbanism project case study',
+    'urban regeneration news',
     
     # 4. Talent Attraction & Livability
-    '"talent attraction" OR "skilled migration" city strategy',
-    '"livability" OR "quality of life" city index report',
+    'talent attraction city strategy',
+    'livability city index report',
+    'quality of life urban research',
     
-    # 5. Аналитические отчеты и Whitepapers (включая PDF)
-    '"place marketing" OR "nation branding" filetype:pdf report',
-    '"economic development" "innovation district" insights filetype:pdf'
+    # 5. Аналитические отчеты и Whitepapers (ищем PDF через текст)
+    'nation branding whitepaper pdf',
+    'economic development innovation district pdf',
+    'place marketing research report pdf'
 ]
 
 # ==============================================================================
