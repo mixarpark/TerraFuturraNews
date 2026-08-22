@@ -1,3 +1,5 @@
+from deep_translator import GoogleTranslator
+import time
 import os
 import re
 import requests
