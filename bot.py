@@ -16,10 +16,62 @@ FOLDER_PATH = "library_files"
 SOURCE_LINKS_FILE = "source_links.txt"
 HISTORY_FILE = "sent_articles.txt"
 
-KEYWORDS = ['ar', 'phygital', 'audio', 'immersive', 'xr', 'augmented reality', 
-            'spatial audio', 'immsersive audio', 'mixed reality', 
-            'spatial computing', 'interactive', 'smart glasses', 'ai', 'territorial branding', 'branding', 'territorial marketing', 'marketing', 'place marketing',  'placemarketing']
-EXCEPTIONS = ['vr', 'virtual reality']
+# Keywords for News Parsing: Territorial Marketing, Tourism, Urban Dev & Talent Attraction
+
+KEYWORDS = [
+    # --- Core Place Marketing & Branding ---
+    'place branding', 'place marketing', 'territorial branding', 'territorial marketing',
+    'city branding', 'city marketing', 'destination branding', 'destination marketing',
+    'regional branding', 'regional marketing', 'nation branding', 'location marketing',
+    'place identity', 'place reputation', 'place image', 'destination management organization',
+    
+    # --- Tourism & Visitor Economy ---
+    'visitor economy', 'sustainable tourism', 'ecotourism', 'smart tourism',
+    'experiential travel', 'experiential tourism', 'cultural tourism', 'rural tourism',
+    'tourism development', 'tourist attraction', 'destination management', 
+    'digital nomad destination',
+    
+    # --- Urban Development & Placemaking ---
+    'urban development', 'urban planning', 'placemaking', 'creative placemaking',
+    'urban regeneration', 'urban revitalization', 'smart city', 'smart urbanism',
+    'public space activation', 'urban design', 'tactical urbanism', '15-minute city',
+    'transit-oriented development', 'sustainable urban development',
+    
+    # --- Livability & Resident Attractiveness ---
+    'livability', 'liveability', 'quality of life', 'citizen well-being',
+    'resident engagement', 'community engagement', 'resident retention', 'resident attraction',
+    'urban amenities', 'vibrant community', 'community building', 'inclusive city',
+    'social inclusion', 'green infrastructure', 'citizen happiness',
+    
+    # --- Skilled Migration, Talent & Economic Development ---
+    'talent attraction', 'talent retention', 'skilled migration', 'global talent',
+    'brain gain', 'human capital', 'knowledge economy', 'creative class',
+    'innovation ecosystem', 'startup ecosystem', 'expat community', 'relocation hub',
+    'economic development', 'foreign direct investment', 'innovation district'
+]
+
+# Exceptions to filter out corporate HR, digital marketing spam, and negative urban/tourism trends
+EXCEPTIONS = [
+    # Marketing & Commercial Branding noise
+    'digital marketing', 'email marketing', 'affiliate marketing', 'influencer marketing',
+    'multi-level marketing', 'network marketing', 'brand ambassador', 'trademark', 
+    'seo marketing', 'content marketing',
+    
+    # Negative or irrelevant Tourism
+    'overtourism', 'tourist trap', 'dark tourism', 'space tourism', 'medical tourism',
+    
+    # Negative Migration & Corporate HR noise
+    'brain drain', 'talent acquisition', 'talent management', 'talent show', 
+    'corporate branding', 'employer branding', 
+    
+    # Unrelated Economy/Real Estate
+    'real estate bubble', 'stock market', 'parking ticket'
+]
+
+# Пример логики для парсера (псевдокод/набросок для дальнейшего использования):
+# match = any(keyword in text_lower for keyword in KEYWORDS) and not any(exception in text_lower for exception in EXCEPTIONS)
+
+
 
 # Предварительная компиляция регулярных выражений для СУПЕР-быстрого поиска
 # Ищем любое из ключевых слов как самостоятельное слово (без учета регистра)
