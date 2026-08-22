@@ -206,7 +206,7 @@ def send_telegram_report(new_sources):
 # ==============================================================================
 # 5. ОСНОВНОЙ ЦИКЛ ПОИСКА И ОБРАБОТКИ
 # ==============================================================================
-print("🚀 Разведчик запускает масштабный сбор источников...")
+print("🚀 Разведчик запускает масштабный мультиязычный сбор источников...")
 
 if not SERPER_API_KEY:
     print("❌ Ошибка: SERPER_API_KEY не задан в секретах GitHub!")
@@ -215,34 +215,53 @@ if not SERPER_API_KEY:
 existing_links = get_existing_links()
 discovered_items = [] # Список кортежей: (url, snippet, base_domain)
 
-for query in SEARCH_QUERIES:
-    print(f"📡 Поиск: {query}")
-    try:
-        resp = requests.post(
-            "https://google.serper.dev/search",
-            headers={'X-API-KEY': SERPER_API_KEY, 'Content-Type': 'application/json'},
-            json={"q": query, "num": 20}, # Запрашиваем 20 результатов на каждый запрос
-            timeout=REQ_TIMEOUT
-        )
-        
-        if resp.status_code != 200:
-            print(f"⚠️ Ошибка Serper ({resp.status_code}): {resp.text}")
-            continue
+# Коды 18 целевых языков
+TARGET_LANGUAGES = [
+    'es', 'pt', 'it', 'id', 'vi', 'hi', 'ur', 'tr', 'ka', 
+    'hy', 'kk', 'zh-CN', 'ru', 'de', 'fr', 'ar', 'ja', 'ko'
+]
+
+for base_query in SEARCH_QUERIES:
+    for lang in TARGET_LANGUAGES:
+        try:
+            # 1. Автоматически переводим английский запрос на целевой язык
+            translated_query = GoogleTranslator(source='en', target=lang).translate(base_query)
+            print(f"📡 Поиск [{lang.upper()}]: {translated_query}")
             
-        for item in resp.json().get('organic', []):
-            link = item.get('link', '')
-            snippet = item.get('snippet', '')
-            if not link:
+            # 2. Отправляем запрос в Google с настройкой языка (hl)
+            resp = requests.post(
+                "https://google.serper.dev/search",
+                headers={'X-API-KEY': SERPER_API_KEY, 'Content-Type': 'application/json'},
+                json={
+                    "q": translated_query, 
+                    "num": 20,
+                    "hl": lang # Принудительно ищем на языке региона
+                },
+                timeout=REQ_TIMEOUT
+            )
+            
+            if resp.status_code != 200:
+                print(f"⚠️ Ошибка Serper ({resp.status_code}): {resp.text}")
                 continue
                 
-            domain = urlparse(link).netloc.replace("www.", "")
-            if domain and not any(bl in domain for bl in BLACKLIST_DOMAINS):
-                if link not in existing_links:
-                    discovered_items.append((link, snippet))
-    except Exception as e:
-        print(f"❌ Сбой запроса к API: {e}")
+            for item in resp.json().get('organic', []):
+                link = item.get('link', '')
+                snippet = item.get('snippet', '')
+                if not link:
+                    continue
+                    
+                domain = urlparse(link).netloc.replace("www.", "")
+                if domain and not any(bl in domain for bl in BLACKLIST_DOMAINS):
+                    if link not in existing_links:
+                        discovered_items.append((link, snippet))
+                        
+            # Небольшая пауза, чтобы не получить блокировку от API-переводчика
+            time.sleep(1)
+            
+        except Exception as e:
+            print(f"❌ Сбой запроса к API ({lang.upper()}): {e}")
 
-print(f"🔍 Всего кандидатов на проверку: {len(discovered_items)}")
+print(f"🔍 Всего кандидатов на проверку со всего мира: {len(discovered_items)}")
 
 # Валидация и категоризация
 valid_new_sources = {}
