@@ -2,9 +2,10 @@ name: Run RSS Scout
 
 on:
   schedule:
-    - cron: '0 10 * * 6'
+    - cron: '0 10 * * 6' # Каждую субботу
   workflow_dispatch:
 
+# ВАЖНО: Разрешаем боту перезаписывать файлы в репозитории
 permissions:
   contents: write
 
@@ -12,19 +13,31 @@ jobs:
   run-scout:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Скачивание кода
+        uses: actions/checkout@v4
+
+      - name: Установка Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - run: pip install requests beautifulsoup4 feedparser
-      - env:
+
+      - name: Установка библиотек
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 feedparser
+
+      - name: Запуск Разведчика
+        env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
         run: python scout.py
-      - run: |
+      
+      - name: Сохранение новых источников в базу
+        # Этот шаг забирает измененный source_links.txt и сохраняет его на GitHub
+        run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add source_links.txt
-          git commit -m "Разведка: база пополнена" || echo "Нет изменений"
+          git commit -m "Разведка: добавлены новые источники" || echo "Нет новых источников"
           git push
