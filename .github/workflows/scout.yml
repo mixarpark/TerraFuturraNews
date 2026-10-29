@@ -28,16 +28,7 @@ jobs:
 
       - name: Запуск Разведчика
         env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
+          WEBAPP_URL: ${{ secrets.WEBAPP_URL }}
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
         run: python scout.py
-      
-      - name: Сохранение новых источников в базу
-        # Этот шаг забирает измененный source_links.txt и сохраняет его на GitHub
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add source_links.txt
-          git commit -m "Разведка: добавлены новые источники" || echo "Нет новых источников"
-          git push
+            
