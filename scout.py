@@ -10,12 +10,8 @@ from urllib.parse import urlparse, urljoin
 # ==============================================================================
 # 1. НАСТРОЙКИ И АВТОРИЗАЦИЯ
 # ==============================================================================
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-CHAT_ID = os.getenv('CHAT_ID')
+WEBAPP_URL = os.getenv('WEBAPP_URL')
 SERPER_API_KEY = os.getenv('SERPER_API_KEY')
-
-EXISTING_SOURCES_FILE = "source_links.txt"
-PENDING_FILE = "pending_sources.txt"
 
 REQ_TIMEOUT = 12
 HEADERS = {
@@ -183,24 +179,6 @@ def validate_web_page_or_doc(url, snippet=""):
         pass
     return False, ""
 
-def send_telegram_report(new_sources):
-    """Отправляет краткий отчет в Telegram только с числом найденных сайтов."""
-    if not new_sources or not BOT_TOKEN or not CHAT_ID:
-        return
-        
-    # Формируем только заголовок и количество
-    text = (
-        f"🕵️‍♂️ <b>Отчет Разведчика</b>\n\n"
-        f"Успешно найдено и добавлено в базу: <b>{len(new_sources)}</b> новых источников.\n"
-        f"<i>Основной бот проверит их при следующем запуске.</i>"
-    )
-    
-    tg_api = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    try:
-        requests.post(tg_api, data={"chat_id": CHAT_ID, "text": text, "parse_mode": "HTML"}, timeout=10)
-    except Exception as e:
-        print(f"⚠️ Ошибка отправки отчета в Telegram: {e}")
-
 
 
 # ==============================================================================
@@ -212,91 +190,73 @@ if not SERPER_API_KEY:
     print("❌ Ошибка: SERPER_API_KEY не задан в секретах GitHub!")
     exit(1)
 
-existing_links = get_existing_links()
-discovered_items = [] # Список кортежей: (url, snippet, base_domain)
+try:
+    req = requests.post(WEBAPP_URL, json={"action": "get_all_experts_radars"}, timeout=30)
+    experts_data = req.json().get('experts', [])
+except Exception as e:
+    print(f"❌ Ошибка связи с GAS: {e}")
+    exit(1)
 
-# Коды 18 целевых языков
-TARGET_LANGUAGES = [
-    'es', 'pt', 'it', 'id', 'vi', 'hi', 'ur', 'tr', 'ka', 
-    'hy', 'kk', 'zh-CN', 'ru', 'de', 'fr', 'ar', 'ja', 'ko'
-]
+TARGET_LANGUAGES = ['es', 'pt', 'it', 'id', 'vi', 'hi', 'ur', 'tr', 'ka', 'hy', 'kk', 'zh-CN', 'ru', 'de', 'fr', 'ar', 'ja', 'ko']
 
-for base_query in SEARCH_QUERIES:
-    for lang in TARGET_LANGUAGES:
-        try:
-            # 1. Автоматически переводим английский запрос на целевой язык
-            translated_query = GoogleTranslator(source='en', target=lang).translate(base_query)
-            print(f"📡 Поиск [{lang.upper()}]: {translated_query}")
-            
-            # 2. Отправляем запрос в Google с настройкой языка (hl)
-            resp = requests.post(
-                "https://google.serper.dev/search",
-                headers={'X-API-KEY': SERPER_API_KEY, 'Content-Type': 'application/json'},
-                json={
-                    "q": translated_query, 
-                    "num": 20,
-                    "hl": lang # Принудительно ищем на языке региона
-                },
-                timeout=REQ_TIMEOUT
-            )
-            
-            if resp.status_code != 200:
-                print(f"⚠️ Ошибка Serper ({resp.status_code}): {resp.text}")
+for expert in experts_data:
+    email = expert.get('email')
+    existing_links = set(expert.get('sources', []))
+    discovered_items = []
+    print(f"\n📡 Разведка для эксперта: {email}")
+
+    for base_query in SEARCH_QUERIES:
+        for lang in TARGET_LANGUAGES:
+            try:
+                translated_query = GoogleTranslator(source='en', target=lang).translate(base_query)
+                resp = requests.post(
+                    "https://google.serper.dev/search",
+                    headers={'X-API-KEY': SERPER_API_KEY, 'Content-Type': 'application/json'},
+                    json={"q": translated_query, "num": 10, "hl": lang},
+                    timeout=REQ_TIMEOUT
+                )
+                
+                if resp.status_code == 200:
+                    for item in resp.json().get('organic', []):
+                        link = item.get('link', '')
+                        snippet = item.get('snippet', '')
+                        if not link: continue
+                        domain = urlparse(link).netloc.replace("www.", "")
+                        if domain and not any(bl in domain for bl in BLACKLIST_DOMAINS):
+                            if link not in existing_links:
+                                discovered_items.append((link, snippet))
+                time.sleep(1)
+            except:
+                pass
+
+    valid_new_sources = []
+    for link, snippet in discovered_items:
+        if link in existing_links: continue
+        base_url = f"{urlparse(link).scheme}://{urlparse(link).netloc}"
+        
+        rss_url = find_rss_on_page(base_url)
+        if rss_url and rss_url not in existing_links:
+            is_valid, title = validate_rss(rss_url)
+            if is_valid:
+                valid_new_sources.append({"url": rss_url, "type": "RSS-лента", "title": title})
+                existing_links.add(rss_url)
                 continue
                 
-            for item in resp.json().get('organic', []):
-                link = item.get('link', '')
-                snippet = item.get('snippet', '')
-                if not link:
-                    continue
-                    
-                domain = urlparse(link).netloc.replace("www.", "")
-                if domain and not any(bl in domain for bl in BLACKLIST_DOMAINS):
-                    if link not in existing_links:
-                        discovered_items.append((link, snippet))
-                        
-            # Небольшая пауза, чтобы не получить блокировку от API-переводчика
-            time.sleep(1)
-            
-        except Exception as e:
-            print(f"❌ Сбой запроса к API ({lang.upper()}): {e}")
-
-print(f"🔍 Всего кандидатов на проверку со всего мира: {len(discovered_items)}")
-
-# Валидация и категоризация
-valid_new_sources = {}
-
-for link, snippet in discovered_items:
-    if link in existing_links or link in valid_new_sources:
-        continue
-        
-    base_url = f"{urlparse(link).scheme}://{urlparse(link).netloc}"
-    
-    # А. Попытка 1: Проверяем наличие RSS-ленты у сайта
-    rss_url = find_rss_on_page(base_url)
-    if rss_url and rss_url not in existing_links:
-        is_valid, title = validate_rss(rss_url)
+        is_valid, title = validate_web_page_or_doc(link, snippet)
         if is_valid:
-            print(f"   [+] Найдена RSS-лента: {title} ({rss_url})")
-            valid_new_sources[rss_url] = {"title": title, "type": "📡 RSS-лента"}
-            existing_links.add(rss_url)
-            continue
-            
-    # Б. Попытка 2: Проверяем прямую страницу/блог/PDF-отчет
-    is_valid, title = validate_web_page_or_doc(link, snippet)
-    if is_valid:
-        doc_type = "📄 PDF Отчет" if link.lower().endswith('.pdf') else "🌐 Статья / Блог"
-        print(f"   [+] Найден материал ({doc_type}): {title} ({link})")
-        valid_new_sources[link] = {"title": title, "type": doc_type}
-        existing_links.add(link)
+            doc_type = "PDF" if link.lower().endswith('.pdf') else "Блог / Сайт"
+            valid_new_sources.append({"url": link, "type": doc_type, "title": title})
+            existing_links.add(link)
 
-# Сохранение и отчет
-if valid_new_sources:
-    with open(EXISTING_SOURCES_FILE, "a", encoding="utf-8") as f:
-        for url in valid_new_sources.keys():
-            f.write(f"{url}\n")
-            
-    send_telegram_report(valid_new_sources)
-    print(f"🎉 Разведка завершена! Добавлено {len(valid_new_sources)} новых источников.")
-else:
-    print("🤷‍♂️ Новых валидных источников в этом цикле не найдено.")
+    if valid_new_sources:
+        print(f"   [+] Найдено {len(valid_new_sources)} новых источников. Отправляем в Эксперториум...")
+        try:
+            requests.post(WEBAPP_URL, json={
+                "action": "push_radar_findings", 
+                "email": email, 
+                "new_sources": valid_new_sources
+            }, timeout=30)
+        except Exception as e:
+            print(f"   [!] Ошибка отправки: {e}")
+
+print("\n🎉 Разведка для всех экспертов успешно завершена!")
