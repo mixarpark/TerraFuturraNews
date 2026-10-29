@@ -113,13 +113,6 @@ BLACKLIST_DOMAINS = {
 # ==============================================================================
 # 4. СЛУЖЕБНЫЕ ФУНКЦИИ ИЗВЛЕЧЕНИЯ И ВАЛИДАЦИИ
 # ==============================================================================
-def get_existing_links():
-    """Считывает уже имеющиеся ссылки, чтобы исключить дубликаты."""
-    if not os.path.exists(EXISTING_SOURCES_FILE):
-        return set()
-    with open(EXISTING_SOURCES_FILE, "r", encoding="utf-8") as f:
-        return {line.strip() for line in f if line.strip()}
-
 def find_rss_on_page(url):
     """Ищет RSS/Atom ленту в заголовке HTML."""
     try:
@@ -188,6 +181,10 @@ print("🚀 Разведчик запускает масштабный муль�
 
 if not SERPER_API_KEY:
     print("❌ Ошибка: SERPER_API_KEY не задан в секретах GitHub!")
+    exit(1)
+
+if not WEBAPP_URL:
+    print("❌ Ошибка: WEBAPP_URL не задан в секретах GitHub!")
     exit(1)
 
 try:
