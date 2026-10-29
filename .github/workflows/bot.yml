@@ -30,17 +30,8 @@ jobs:
 
       - name: Запуск скрипта
         env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
+          WEBAPP_URL: ${{ secrets.WEBAPP_URL }}
         # ВНИМАНИЕ: убедись, что твой файл со скриптом называется именно bot.py
         # Если он называется иначе (например, main.py), поменяй название ниже!
         run: python bot.py
-      
-      - name: Сохранение результатов в GitHub (Commit and Push)
-        # Объединили два твоих шага с git push в один для скорости
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add source_links.txt sent_articles.txt
-          git commit -m "Автоматическое обновление базы ссылок и истории" || echo "Нет новых изменений"
-          git push
+            
