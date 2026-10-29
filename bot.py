@@ -132,7 +132,11 @@ for expert in experts_data:
                 match_exc = EXC_PATTERN.search(clean_text)
                 if match_kw and not match_exc:
                     page_title = soup.title.string.strip() if soup.title and soup.title.string else url
-                    found_items.append({"title": page_title, "url": url, "keyword": match_kw.group(1).lower()})
+                    try:
+                        ru_t = translator.translate(page_title)
+                    except:
+                        ru_t = page_title
+                    found_items.append({"title": page_title, "ru_title": ru_t, "url": url, "keyword": match_kw.group(1).lower()})
                     history.add(url)
             except: pass
         else:
@@ -146,7 +150,11 @@ for expert in experts_data:
                 match_kw = KW_PATTERN.search(combined_text)
                 match_exc = EXC_PATTERN.search(combined_text)
                 if match_kw and not match_exc:
-                    found_items.append({"title": title, "url": link, "keyword": match_kw.group(1).lower()})
+                    try:
+                        ru_t = translator.translate(title)
+                    except:
+                        ru_t = title
+                    found_items.append({"title": title, "ru_title": ru_t, "url": link, "keyword": match_kw.group(1).lower()})
                     history.add(link)
 
     # 4. Отправляем находки обратно в Модерацию Эксперториума
