@@ -9,12 +9,10 @@ from deep_translator import GoogleTranslator
 # ==========================================
 # 1. КОНФИГУРАЦИЯ И НАСТРОЙКИ
 # ==========================================
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-CHAT_ID = os.getenv('CHAT_ID')
-
-FOLDER_PATH = "library_files"
-SOURCE_LINKS_FILE = "source_links.txt"
-HISTORY_FILE = "sent_articles.txt"
+WEBAPP_URL = os.getenv('WEBAPP_URL')
+if not WEBAPP_URL:
+    print("❌ Ошибка: WEBAPP_URL не задан!")
+    exit(1)
 
 KEYWORDS = [
     # Core Place Marketing & Branding
@@ -90,131 +88,77 @@ def extract_links_from_txt(file_path):
         print(f"❌ Ошибка чтения TXT {file_path}: {e}")
         return set()
 
-def send_to_telegram(title, url, keyword):
-    try:
-        translated_title = translator.translate(title)
-    except:
-        translated_title = title 
+# ==========================================
+# 3. ОСНОВНОЙ ЦИКЛ (ОПРОС БАЗ ЭКСПЕРТОВ ЧЕРЕЗ API)
+# ==========================================
+print("🚀 Запрашиваем базы всех экспертов из Эксперториума...")
+try:
+    req = requests.post(WEBAPP_URL, json={"action": "get_all_experts_radars"}, timeout=30)
+    experts_data = req.json().get('experts', [])
+except Exception as e:
+    print(f"❌ Ошибка связи с GAS: {e}")
+    exit(1)
 
-    hashtag = f"#{keyword.replace(' ', '_')}"
-    message_text = f"📰 Найдено по тегу {hashtag}\n\n🇷🇺 {translated_title}\n🇬🇧 {title}\n\n🔗 {url}"
+if not experts_data:
+    print("🤷‍♂️ Активных экспертов с базами не найдено.")
+    exit(0)
+
+print(f"✅ Получено экспертов для обхода: {len(experts_data)}")
+
+for expert in experts_data:
+    email = expert.get('email')
+    sources = expert.get('sources', [])
+    history = set(expert.get('sent_articles', []))
+    found_items = []
     
-    tg_api = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    try:
-        requests.post(tg_api, data={"chat_id": CHAT_ID, "text": message_text}, timeout=10)
-    except Exception as e:
-        print(f"❌ Ошибка отправки в Telegram: {e}")
+    print(f"\n📡 Обработка эксперта: {email} (Источников: {len(sources)})")
 
-# ==========================================
-# 3. ПОДГОТОВКА ИСТОЧНИКОВ (СБОР БАЗЫ)
-# ==========================================
-all_links = set()
-
-# А. Сначала берем то, что УЖЕ есть (сохраняем работу Разведчика!)
-if os.path.exists(SOURCE_LINKS_FILE):
-    with open(SOURCE_LINKS_FILE, "r", encoding="utf-8") as f:
-        all_links.update(f.read().splitlines())
-
-# Б. Затем добавляем свежие ссылки из ручных файлов (PDF/TXT)
-if os.path.exists(FOLDER_PATH):
-    print(f"📁 Проверяем папку {FOLDER_PATH}...")
-    for file_name in os.listdir(FOLDER_PATH):
-        full_path = os.path.join(FOLDER_PATH, file_name)
-        if file_name.lower().endswith(".pdf"):
-            all_links.update(extract_links_from_pdf(full_path))
-        elif file_name.lower().endswith(".txt"):
-            all_links.update(extract_links_from_txt(full_path))
-
-# В. Сохраняем объединенную базу без потери данных
-with open(SOURCE_LINKS_FILE, "w", encoding="utf-8") as f:
-    for link in sorted(all_links):
-        if link.strip():
-            f.write(link.strip() + "\n")
-
-print(f"✅ База сформирована. Всего уникальных ссылок для проверки: {len(all_links)}")
-
-# ==========================================
-# 4. ПОИСК, ФИЛЬТРАЦИЯ И ОТПРАВКА НОВОСТЕЙ
-# ==========================================
-sent_links = set()
-if os.path.exists(HISTORY_FILE):
-    with open(HISTORY_FILE, "r", encoding="utf-8") as file:
-        sent_links = set(file.read().splitlines())
-
-print("\n🚀 Начинаем проверку сайтов и RSS-лент...")
-
-for url in all_links:
-    if not url.strip(): continue
-    print(f"📡 Подключаемся к: {url}")
-    
-    try:
-        # ОБЯЗАТЕЛЬНО используем headers, чтобы не получить 403 Forbidden
-        response = requests.get(url, headers=HEADERS, timeout=12)
-        if response.status_code != 200:
-            print(f"⚠️ Сервер отклонил запрос (Код {response.status_code}). Пропускаем.")
-            continue
-            
-        feed = feedparser.parse(response.content)
-    except Exception as e:
-        print(f"⚠️ Ошибка сети или таймаут: {e}")
-        continue
-
-    # ================= ЛОГИКА 1: ОБЫЧНЫЕ ВЕБ-СТРАНИЦЫ =================
-    if not feed.entries:
-        if url in sent_links:
-            print(f"⏭️ Пропускаем: {url} (уже отправлено)")
-            continue
-            
+    for url in sources:
+        if not url.strip() or url in history: continue
         try:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Ищем текст ТОЛЬКО в заголовках и абзацах (игнорируем меню и подвалы сайта)
-            text_elements = soup.find_all(['title', 'h1', 'h2', 'h3', 'p', 'meta'])
-            clean_text = ' '.join(elem.get_text(separator=' ', strip=True) for elem in text_elements).lower()
-            
-            match_kw = KW_PATTERN.search(clean_text)
-            match_exc = EXC_PATTERN.search(clean_text)
-            
-            print(f"🤖 Анализ страницы | Ключи: {bool(match_kw)} | Исключения: {bool(match_exc)}")
-            
-            if match_kw and not match_exc:
-                page_title = soup.title.string.strip() if soup.title and soup.title.string else url
-                found_word = match_kw.group(1).lower()
+            response = requests.get(url, headers=HEADERS, timeout=12)
+            if response.status_code != 200: continue
+            feed = feedparser.parse(response.content)
+        except:
+            continue
+
+        if not feed.entries:
+            try:
+                soup = BeautifulSoup(response.text, 'html.parser')
+                text_elements = soup.find_all(['title', 'h1', 'h2', 'h3', 'p', 'meta'])
+                clean_text = ' '.join(elem.get_text(separator=' ', strip=True) for elem in text_elements).lower()
                 
-                print(f"✅ Отправляем: {page_title}")
-                send_to_telegram(page_title, url, found_word)
+                match_kw = KW_PATTERN.search(clean_text)
+                match_exc = EXC_PATTERN.search(clean_text)
+                if match_kw and not match_exc:
+                    page_title = soup.title.string.strip() if soup.title and soup.title.string else url
+                    found_items.append({"title": page_title, "url": url, "keyword": match_kw.group(1).lower()})
+                    history.add(url)
+            except: pass
+        else:
+            for article in feed.entries:
+                link = getattr(article, 'link', '')
+                if not link or link in history: continue
+                title = getattr(article, 'title', '')
+                summary = getattr(article, 'summary', '')
+                combined_text = f"{title} {summary}".lower()
                 
-                with open(HISTORY_FILE, "a", encoding="utf-8") as file:
-                    file.write(url + "\n")
-                sent_links.add(url)
-                
+                match_kw = KW_PATTERN.search(combined_text)
+                match_exc = EXC_PATTERN.search(combined_text)
+                if match_kw and not match_exc:
+                    found_items.append({"title": title, "url": link, "keyword": match_kw.group(1).lower()})
+                    history.add(link)
+
+    # 4. Отправляем находки обратно в Модерацию Эксперториума
+    if found_items:
+        print(f"   [+] Отправляем {len(found_items)} новых статей эксперту {email}...")
+        try:
+            requests.post(WEBAPP_URL, json={
+                "action": "push_radar_findings", 
+                "email": email, 
+                "items": found_items
+            }, timeout=30)
         except Exception as e:
-            print(f"⚠️ Ошибка парсинга HTML {url}: {e}")
+            print(f"   [!] Ошибка отправки: {e}")
 
-    # ================= ЛОГИКА 2: СТАНДАРТНЫЕ RSS-ЛЕНТЫ =================
-    else:
-        for article in feed.entries:
-            link = getattr(article, 'link', '')
-            if not link or link in sent_links:
-                continue
-                
-            title = getattr(article, 'title', '')
-            summary = getattr(article, 'summary', '')
-            combined_text = f"{title} {summary}".lower()
-            
-            match_kw = KW_PATTERN.search(combined_text)
-            match_exc = EXC_PATTERN.search(combined_text)
-            
-            print(f"🤖 Анализ RSS: {title} | Ключевые: {bool(match_kw)} | Исключения: {bool(match_exc)}")
-            
-            if match_kw and not match_exc:
-                found_word = match_kw.group(1).lower()
-                print(f"✅ Отправляем RSS: {title}")
-                
-                send_to_telegram(title, link, found_word)
-                
-                with open(HISTORY_FILE, "a", encoding="utf-8") as file:
-                    file.write(link + "\n")
-                sent_links.add(link)
-
-print("🎉 Проверка успешно завершена!")
+print("\n🎉 Все базы экспертов успешно проверены!")
